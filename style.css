@@ -114,6 +114,15 @@ p, li { color: #303a4d; }
 
 .card p:last-child, .card ul:last-child { margin-bottom: 0; }
 
+/* A caution card. Amber rather than red — this is something to read carefully,
+   not an error. Uses a left rule instead of a full tint so it stays legible. */
+.notice {
+  border-left: 4px solid var(--amber, #ffb020);
+  background: #fffbf2;
+  border-color: #f5e3c2;
+  border-left-color: #ffb020;
+}
+
 ul { padding-left: 22px; }
 li { margin: 6px 0; }
 
