@@ -1,0 +1,12 @@
+/* ElectroVision webfonts.
+ * The shipped app uses system fonts; the professional pitch deck used
+ * Georgia (serif headings) + Calibri (body). We substitute closely-matched
+ * Google Fonts so the institutional B2B register renders consistently
+ * everywhere, and add IBM Plex Mono for energy data (kWh, $, scores, meter).
+ *
+ * SUBSTITUTION FLAGGED IN README:
+ *   Source Serif 4  ≈ Georgia   (institutional display / big stats)
+ *   Source Sans 3   ≈ Calibri   (UI + body)
+ *   IBM Plex Mono   (new)        (numeric / technical energy data)
+ */
+@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Outfit:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap");

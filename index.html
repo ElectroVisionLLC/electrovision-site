@@ -1,76 +1,604 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ElectroVision — AI energy auditor</title>
-<meta name="description" content="Scan your home. See what every appliance actually costs to run.">
-<link rel="stylesheet" href="style.css">
+<title>ElectroVision — See what your home actually costs to run</title>
+<meta name="description" content="ElectroVision turns a photo of a room into an appliance-by-appliance breakdown of your electricity bill, then shows you where the money is going.">
+
+<link rel="icon" href="/favicon.png">
+<link rel="stylesheet" href="/tokens/fonts.css">
+<link rel="stylesheet" href="/tokens/colors.css">
+<link rel="stylesheet" href="/tokens/typography.css">
+<link rel="stylesheet" href="/tokens/spacing.css">
+<link rel="stylesheet" href="/tokens/effects.css">
+<link rel="stylesheet" href="/tokens/ds-base.css">
+<script src="https://unpkg.com/lucide@0.474.0/dist/umd/lucide.min.js" defer></script>
+<style>
+  body { margin: 0; background: #F4F7FB; }
+  a { color: #0CA678; text-decoration: none; }
+  a:hover { color: #12B886; }
+  i[data-lucide] { display: inline-flex; }
+  i[data-lucide] svg { display: block; }
+
+  /* The source artboard is a fixed 1440px canvas with no media queries —
+     correct for a design surface, unusable for a public page where most
+     traffic is a phone. The shell is fluid here; the design's own
+     max-width:1344px rails keep the desktop layout identical. */
+  .lp { width: 100%; font-family: 'Source Sans 3', sans-serif; color: #0B1220; background: #F4F7FB; overflow-x: hidden; }
+
+  @media (max-width: 900px) {
+    /* Every multi-column row in the artboard is a flex row with a fixed-width
+       child. Allowing wrap plus a min-width floor turns each into a stack
+       instead of a horizontally-scrolling strip. */
+    .lp [style*="display:flex"] { flex-wrap: wrap; }
+    .lp [style*="min-width"] { min-width: 0 !important; }
+    .lp [style*="padding:28px 48px"],
+    .lp [style*="padding:96px 48px"],
+    .lp [style*="padding:80px 48px"] { padding-left: 22px !important; padding-right: 22px !important; }
+    .lp h1, .lp [style*="font-size:64px"] { font-size: 38px !important; line-height: 1.08 !important; }
+    .lp [style*="font-size:52px"] { font-size: 32px !important; }
+    .lp [style*="font-size:44px"] { font-size: 28px !important; }
+
+    /* The device mockups are drawn at true iPhone size (393-430px). On a 375px
+       screen they were clipped by the shell's overflow guard, which hid a slice
+       of the very screenshots the page is selling. Scale the whole mockup
+       instead so it stays entirely visible. */
+    .lp [style*="width:430px"] { width: 100% !important; height: auto !important; }
+    .lp [style*="width:393px"] { transform: scale(.82); transform-origin: top left; }
+    .lp [style*="width:451px"], .lp [style*="width:479px"] { max-width: 100% !important; }
+  }
+
+  /* Shared footer — the artboard has no legal links, and Apple requires the
+     privacy policy to be reachable from the marketing site. */
+  .lp-legal { background:#10151C; color:rgba(255,255,255,.62); font-family:'Source Sans 3',sans-serif;
+              padding:28px 48px; display:flex; flex-wrap:wrap; gap:18px 28px;
+              align-items:center; justify-content:center; font-size:14px; }
+  .lp-legal a { color:rgba(255,255,255,.82); }
+  .lp-legal a:hover { color:#12B886; }
+</style>
 </head>
 <body>
+<div class="lp" style="font-family:'Source Sans 3',sans-serif;color:#0B1220;background:#F4F7FB;overflow:hidden">
 
-<header>
-  <div class="bar">
-    <a class="logo" href="/"><span class="spark">&#9889;</span> ElectroVision</a>
-    <nav>
-      <a href="/privacy/">Privacy</a>
-      <a href="/terms/">Terms</a>
+  <!-- ════════ HERO ════════ -->
+  <div style="position:relative;background:#10151C;overflow:hidden">
+    <div style="position:absolute;top:-320px;right:-260px;width:1100px;height:1100px;border-radius:50%;background:radial-gradient(circle,rgba(18,184,134,.18),transparent 62%)"></div>
+
+    <nav style="position:relative;z-index:2;max-width:1344px;margin:0 auto;padding:28px 48px;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:14px">
+        <svg width="46" height="46" viewBox="0 0 100 100">
+          <g fill="none" stroke="rgba(255,255,255,.32)" stroke-width="4" stroke-linecap="round">
+            <path d="M10 28 V18 A8 8 0 0 1 18 10 H28"></path><path d="M72 10 H82 A8 8 0 0 1 90 18 V28"></path>
+            <path d="M90 72 V82 A8 8 0 0 1 82 90 H72"></path><path d="M28 90 H18 A8 8 0 0 1 10 82 V72"></path>
+          </g>
+          <path d="M60 4 L24 55 H46 L38 96 L78 43 H55 Z" fill="#FFFFFF" transform="translate(50,50) scale(0.72) translate(-51,-50)"></path>
+        </svg>
+        <span style="font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:24px;letter-spacing:-0.02em;color:#FFFFFF">ElectroVision</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:36px">
+        <a href="#how" style="font-size:16px;font-weight:600;color:#9DB0CE" style-hover="color:#FFFFFF">How it works</a>
+        <a href="#savings" style="font-size:16px;font-weight:600;color:#9DB0CE" style-hover="color:#FFFFFF">Savings</a>
+        <a href="#utilities" style="font-size:16px;font-weight:600;color:#9DB0CE" style-hover="color:#FFFFFF">For utilities</a>
+        <a href="#pricing" style="font-size:16px;font-weight:600;color:#9DB0CE" style-hover="color:#FFFFFF">Pricing</a>
+        <a href="#waitlist" style="background:#12B886;color:#04221A;font-size:16px;font-weight:800;padding:12px 22px;border-radius:16px" style-hover="background:#0CA678;color:#04221A">Get early access</a>
+      </div>
     </nav>
+
+    <div style="position:relative;z-index:2;max-width:1344px;margin:0 auto;padding:72px 48px 0;display:flex;gap:40px;align-items:flex-start">
+      <div style="flex:1;padding-top:36px;padding-bottom:120px">
+        <div style="font-size:14px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#12B886">AI home energy auditor</div>
+        <h1 style="margin:26px 0 0;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:78px;line-height:1.02;letter-spacing:-0.03em;color:#FFFFFF;max-width:660px;text-wrap:balance">See what your home actually costs to run.</h1>
+        <p style="margin:30px 0 0;font-size:23px;line-height:1.5;color:#9DB0CE;max-width:560px;text-wrap:pretty">Photograph a room. ElectroVision identifies every appliance, prices each one to the month, grades your home A&#8211;F, and hands you a ranked plan to cut the bill.</p>
+
+        <div id="waitlist" style="margin-top:44px;display:flex;gap:12px;max-width:540px">
+          <div style="flex:1;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16);border-radius:16px;padding:16px 20px;display:flex;align-items:center">
+            <span style="font-size:17px;color:#7F91AE">you@email.com</span>
+          </div>
+          <div style="background:#12B886;color:#04221A;font-size:17px;font-weight:800;padding:17px 28px;border-radius:16px;white-space:nowrap;box-shadow:0 4px 10px rgba(18,184,134,.5)">Join the waitlist</div>
+        </div>
+        <div style="margin-top:16px;font-size:15px;color:#7F91AE">Launching on iOS. No spam — one email when the App Store listing goes live.</div>
+
+        <div style="margin-top:52px;display:flex;gap:44px">
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:32px;font-weight:600;color:#FFFFFF;letter-spacing:-0.02em">~2 min</div>
+            <div style="font-size:15px;color:#9DB0CE;margin-top:4px">to audit a room</div>
+          </div>
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:32px;font-weight:600;color:#FFFFFF;letter-spacing:-0.02em">23</div>
+            <div style="font-size:15px;color:#9DB0CE;margin-top:4px">appliances in the catalog</div>
+          </div>
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:32px;font-weight:600;color:#12B886;letter-spacing:-0.02em">$0</div>
+            <div style="font-size:15px;color:#9DB0CE;margin-top:4px">to see your first estimate</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex:none;position:relative;width:430px;height:880px">
+        <div style="position:absolute;left:0;top:0;transform:rotate(-4deg)">
+          <div style="position:relative;width:393px;height:852px">
+            <div style="position:absolute;inset:-13px;background:#0A0A0B;border-radius:67px;box-shadow:0 50px 90px rgba(2,12,9,.6)"></div>
+            <div style="position:absolute;inset:0;border-radius:54px;overflow:hidden;background:linear-gradient(180deg,#FFFFFF 0%,#F4F7FC 45%,#EDF1F8 100%)">
+              <div style="position:absolute;inset:0;background:linear-gradient(to bottom left,rgba(18,184,134,.086),transparent 55%)"></div>
+              <div style="position:absolute;top:14px;left:50%;margin-left:-62px;width:124px;height:36px;border-radius:18px;background:#0A0A0B;z-index:3"></div>
+              <div style="position:relative;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;z-index:2">
+                <span style="font-size:16px;font-weight:700;color:#0F1524">9:41</span>
+                <div style="display:flex;align-items:center;gap:6px;color:#0F1524"><i data-lucide="signal" style="width:16px;height:16px"></i><i data-lucide="wifi" style="width:16px;height:16px"></i><i data-lucide="battery-full" style="width:22px;height:22px"></i></div>
+              </div>
+              <div style="position:relative;z-index:2;padding:8px 16px 0">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div>
+                    <div style="display:flex;align-items:center;gap:6px">
+                      <i data-lucide="zap" style="width:18px;height:18px;color:#12B886"></i>
+                      <span style="font-size:22px;font-weight:800;color:#0F1524">ElectroVision</span>
+                    </div>
+                    <div style="font-size:13px;color:#6B7688;margin-top:2px">Seeing energy, saving costs</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:6px;border:1px solid #12B886;border-radius:999px;padding:6px 10px">
+                    <div style="width:8px;height:8px;border-radius:4px;background:#12B886"></div>
+                    <span style="font-size:11px;font-weight:700;color:#0F1524">AI vision</span>
+                  </div>
+                </div>
+                <div style="margin-top:16px;background:#FFFFFF;border-radius:30px;border:1px solid #EDF1F7;padding:20px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 12px rgba(11,18,32,.05)">
+                  <div style="flex:1">
+                    <div style="font-size:13px;font-weight:600;color:#6B7688">Estimated this month</div>
+                    <div style="font-size:48px;font-weight:700;color:#0F1524;letter-spacing:-1.6px;margin-top:2px;line-height:1.05">$184</div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6B7688">1,314 kWh</span>
+                      <span style="width:3px;height:3px;border-radius:2px;background:#E6EBF3"></span>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6B7688">$2,208/yr</span>
+                    </div>
+                    <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(18,184,134,.09);border-radius:999px;padding:5px 10px;margin-top:10px">
+                      <i data-lucide="trending-down" style="width:13px;height:13px;color:#0CA678"></i>
+                      <span style="font-size:11px;font-weight:700;color:#0CA678">$412/yr to save</span>
+                    </div>
+                  </div>
+                  <div style="position:relative;width:116px;height:116px;flex:none">
+                    <svg width="116" height="116" viewBox="0 0 116 116">
+                      <circle cx="58" cy="58" r="53.2" stroke="rgba(11,18,32,.08)" stroke-width="9.5" fill="none"></circle>
+                      <circle cx="58" cy="58" r="53.2" stroke="#4CAF50" stroke-width="9.5" fill="none" stroke-linecap="round" stroke-dasharray="334.3 334.3" stroke-dashoffset="100.3" transform="rotate(-90 58 58)"></circle>
+                    </svg>
+                    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                      <span style="font-family:'Outfit','Source Sans 3',sans-serif;font-weight:700;font-size:39px;line-height:1.06;letter-spacing:-1px;color:#4CAF50">B</span>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8FA0B8;margin-top:3px">70/100</span>
+                    </div>
+                  </div>
+                </div>
+                <div style="font-size:13px;color:#6B7688;margin-top:12px;text-align:center;line-height:20px">Around typical usage for a home this size.</div>
+
+                <div style="margin-top:20px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                    <span style="font-size:18px;font-weight:700;color:#0F1524">Where it goes</span>
+                    <span style="font-size:13px;font-weight:700;color:#12B886">See all</span>
+                  </div>
+                  <div style="display:flex;gap:10px">
+                    <div style="flex:1;background:#FFFFFF;border-radius:22px;border:1px solid #EDF1F7;padding:16px 4px;display:flex;flex-direction:column;align-items:center;box-shadow:0 2px 8px rgba(11,18,32,.05)">
+                      <div style="position:relative;width:62px;height:62px">
+                        <svg width="62" height="62" viewBox="0 0 62 62"><circle cx="31" cy="31" r="28" stroke="rgba(59,201,219,.13)" stroke-width="6" fill="none"></circle><circle cx="31" cy="31" r="28" stroke="#3BC9DB" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="175.9 175.9" stroke-dashoffset="107.3" transform="rotate(-90 31 31)"></circle></svg>
+                        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><i data-lucide="snowflake" style="width:20px;height:20px;color:#3BC9DB"></i></div>
+                      </div>
+                      <span style="font-size:18px;font-weight:700;color:#0F1524;margin-top:10px">$71</span>
+                      <span style="font-size:13px;font-weight:600;color:#0F1524;margin-top:1px">Cooling</span>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6B7688;margin-top:2px">39% of bill</span>
+                    </div>
+                    <div style="flex:1;background:#FFFFFF;border-radius:22px;border:1px solid #EDF1F7;padding:16px 4px;display:flex;flex-direction:column;align-items:center;box-shadow:0 2px 8px rgba(11,18,32,.05)">
+                      <div style="position:relative;width:62px;height:62px">
+                        <svg width="62" height="62" viewBox="0 0 62 62"><circle cx="31" cy="31" r="28" stroke="rgba(18,184,134,.13)" stroke-width="6" fill="none"></circle><circle cx="31" cy="31" r="28" stroke="#12B886" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="175.9 175.9" stroke-dashoffset="144.2" transform="rotate(-90 31 31)"></circle></svg>
+                        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><i data-lucide="utensils" style="width:20px;height:20px;color:#12B886"></i></div>
+                      </div>
+                      <span style="font-size:18px;font-weight:700;color:#0F1524;margin-top:10px">$34</span>
+                      <span style="font-size:13px;font-weight:600;color:#0F1524;margin-top:1px">Kitchen</span>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6B7688;margin-top:2px">18% of bill</span>
+                    </div>
+                    <div style="flex:1;background:#FFFFFF;border-radius:22px;border:1px solid #EDF1F7;padding:16px 4px;display:flex;flex-direction:column;align-items:center;box-shadow:0 2px 8px rgba(11,18,32,.05)">
+                      <div style="position:relative;width:62px;height:62px">
+                        <svg width="62" height="62" viewBox="0 0 62 62"><circle cx="31" cy="31" r="28" stroke="rgba(32,201,151,.13)" stroke-width="6" fill="none"></circle><circle cx="31" cy="31" r="28" stroke="#20C997" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="175.9 175.9" stroke-dashoffset="153.0" transform="rotate(-90 31 31)"></circle></svg>
+                        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><i data-lucide="washing-machine" style="width:20px;height:20px;color:#20C997"></i></div>
+                      </div>
+                      <span style="font-size:18px;font-weight:700;color:#0F1524;margin-top:10px">$24</span>
+                      <span style="font-size:13px;font-weight:600;color:#0F1524;margin-top:1px">Laundry</span>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6B7688;margin-top:2px">13% of bill</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="margin-top:20px;border-radius:22px;padding:16px;background:linear-gradient(135deg,#0CA678,#0B7A5E)">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <i data-lucide="thermometer" style="width:18px;height:18px;color:#EAFBF4"></i>
+                    <span style="font-size:18px;font-weight:700;color:#EAFBF4">Weatherization opportunity</span>
+                  </div>
+                  <div style="font-size:13px;color:#D6F3E8;margin-top:6px;line-height:19px">Heating &amp; cooling are your biggest controllable loads. Sealing and insulation can cut ~10&#8211;15%.</div>
+                </div>
+              </div>
+
+              <div style="position:absolute;left:16px;right:16px;bottom:16px;display:flex;align-items:center;gap:10px;z-index:4">
+                <div style="flex:1;height:64px;border-radius:999px;background:rgba(255,255,255,.72);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);box-shadow:0 8px 20px rgba(11,18,32,.14);display:flex;align-items:center;padding:0 4px;position:relative">
+                  <div style="position:absolute;left:6px;top:3px;bottom:3px;width:76px;border-radius:999px;background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.95);box-shadow:0 2px 6px rgba(11,18,32,.07)"></div>
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative"><i data-lucide="house" style="width:19px;height:19px;color:#12B886"></i><span style="font-size:10.5px;font-weight:700;color:#12B886">Home</span></div>
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><i data-lucide="sofa" style="width:19px;height:19px;color:#6B7688"></i><span style="font-size:10.5px;font-weight:700;color:#6B7688">Rooms</span></div>
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><i data-lucide="piggy-bank" style="width:19px;height:19px;color:#6B7688"></i><span style="font-size:10.5px;font-weight:700;color:#6B7688">Savings</span></div>
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><i data-lucide="settings" style="width:19px;height:19px;color:#6B7688"></i><span style="font-size:10.5px;font-weight:700;color:#6B7688">Settings</span></div>
+                </div>
+                <div style="width:64px;height:64px;border-radius:32px;background:#12B886;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(18,184,134,.45);flex:none">
+                  <i data-lucide="camera" style="width:23px;height:23px;color:#04221A"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</header>
 
-<main>
-  <h1>See what your home actually costs to run.</h1>
-  <p class="lede">ElectroVision turns a photo of a room into an appliance-by-appliance
-  breakdown of your electricity bill — then shows you where the money is going.</p>
+  <!-- ════════ HOW IT WORKS ════════ -->
+  <div id="how" style="background:#F4F7FB;padding:120px 48px">
+    <div style="max-width:1248px;margin:0 auto">
+      <div style="max-width:720px">
+        <div style="font-size:13px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#0CA678">How it works</div>
+        <h2 style="margin:22px 0 0;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:56px;line-height:1.06;letter-spacing:-0.025em;color:#0B1220">Audit your home in minutes, not a site visit.</h2>
+        <p style="margin:22px 0 0;font-size:20px;line-height:1.55;color:#5A6B85;text-wrap:pretty">Point at the whole room so the AI can spot TVs, lights, AC units, the fridge and more. Then confirm what it found — every quantity and wattage stays yours to edit.</p>
+      </div>
 
-  <div class="card">
-    <h3>How it works</h3>
-    <ul>
-      <li><strong>Scan a room.</strong> Point your camera. Appliances are identified automatically.</li>
-      <li><strong>Tell it how you live.</strong> Loads per week, hours per day, thermostat setpoint.</li>
-      <li><strong>Calibrate against a real bill.</strong> Scan your utility bill or meter and the estimates anchor to your actual usage.</li>
-      <li><strong>Track multiple properties.</strong> A home, an office, a rental — each with its own rooms and rates.</li>
-    </ul>
+      <div style="margin-top:72px;display:grid;grid-template-columns:repeat(3,1fr);gap:32px">
+
+        <div style="background:#FFFFFF;border-radius:22px;box-shadow:0 6px 14px rgba(11,18,32,.08);padding:36px 36px 0;display:flex;flex-direction:column;overflow:hidden">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:#12B886">01</div>
+          <h3 style="margin:14px 0 0;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:30px;letter-spacing:-0.02em;color:#0B1220">Scan a room</h3>
+          <p style="margin:14px 0 0;font-size:17px;line-height:1.55;color:#5A6B85">Name the room, pick a scan depth, take one photo — or record a short video and it reads several frames.</p>
+          <div style="margin-top:32px;position:relative;height:344px">
+            <div style="position:absolute;left:50%;margin-left:-176px;top:0;width:352px;height:660px;background:#0A0A0B;border-radius:52px;padding:11px;box-shadow:0 20px 40px rgba(11,18,32,.22)">
+              <div style="width:330px;height:638px;border-radius:42px;overflow:hidden;background:linear-gradient(180deg,#FFFFFF,#F4F7FC);position:relative">
+                <div style="padding:20px 14px 0">
+                  <div style="font-size:19px;font-weight:700;color:#0F1524">Scan a room</div>
+                  <div style="font-size:13px;font-weight:700;color:#0F1524;margin-top:18px">Which room?</div>
+                  <div style="margin-top:8px;background:#FFFFFF;border-radius:16px;padding:11px 13px;font-size:14px;color:#0F1524;box-shadow:0 2px 8px rgba(11,18,32,.05)">Living room</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:11px">
+                    <span style="background:#12B886;border:1px solid #12B886;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:800;color:#04221A">Living room</span>
+                    <span style="border:1px solid #DEE5EF;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:600;color:#6B7688">Kitchen</span>
+                    <span style="border:1px solid #DEE5EF;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:600;color:#6B7688">Bedroom</span>
+                  </div>
+                  <div style="font-size:13px;font-weight:700;color:#0F1524;margin-top:20px">Scan quality</div>
+                  <div style="display:flex;gap:7px;margin-top:9px">
+                    <span style="border:1px solid #DEE5EF;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:600;color:#6B7688">Light</span>
+                    <span style="background:#12B886;border:1px solid #12B886;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:800;color:#04221A">Standard</span>
+                    <span style="border:1px solid #DEE5EF;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:600;color:#6B7688">Deep</span>
+                  </div>
+                  <div style="background:#12B886;border-radius:16px;padding:14px;margin-top:24px;display:flex;align-items:center;justify-content:center;gap:8px">
+                    <i data-lucide="camera" style="width:17px;height:17px;color:#04221A"></i>
+                    <span style="font-size:14px;font-weight:800;color:#04221A">Scan this room</span>
+                  </div>
+                  <div style="display:flex;gap:9px;margin-top:11px">
+                    <div style="flex:1;background:#FFFFFF;border:1px solid #EDF1F7;border-radius:999px;padding:11px;display:flex;align-items:center;justify-content:center;gap:6px"><i data-lucide="video" style="width:14px;height:14px;color:#0F1524"></i><span style="font-size:12px;font-weight:700;color:#0F1524">Record a video</span></div>
+                    <div style="flex:1;background:#FFFFFF;border:1px solid #EDF1F7;border-radius:999px;padding:11px;display:flex;align-items:center;justify-content:center;gap:6px"><i data-lucide="image" style="width:14px;height:14px;color:#0F1524"></i><span style="font-size:12px;font-weight:700;color:#0F1524">From library</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF;border-radius:22px;box-shadow:0 6px 14px rgba(11,18,32,.08);padding:36px 36px 0;display:flex;flex-direction:column;overflow:hidden">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:#12B886">02</div>
+          <h3 style="margin:14px 0 0;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:30px;letter-spacing:-0.02em;color:#0B1220">AI reads the room</h3>
+          <p style="margin:14px 0 0;font-size:17px;line-height:1.55;color:#5A6B85">Claude vision identifies appliances and estimates their power draw. Photos are analysed, then discarded.</p>
+          <div style="margin-top:32px;position:relative;height:344px">
+            <div style="position:absolute;left:50%;margin-left:-176px;top:0;width:352px;height:660px;background:#0A0A0B;border-radius:52px;padding:11px;box-shadow:0 20px 40px rgba(11,18,32,.22)">
+              <div style="width:330px;height:638px;border-radius:42px;overflow:hidden;background:linear-gradient(180deg,#FFFFFF,#F4F7FC);position:relative">
+                <div style="padding:20px 14px 0">
+                  <div style="height:210px;border-radius:22px;overflow:hidden;background:#F1F4F9"><image-slot id="lp-room-photo" shape="rounded" radius="22" placeholder="Drop a room photo"></image-slot></div>
+                  <div style="display:flex;flex-direction:column;align-items:center;margin-top:26px">
+                    <svg width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="17" stroke="rgba(18,184,134,.2)" stroke-width="4" fill="none"></circle><circle cx="21" cy="21" r="17" stroke="#12B886" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="106.8 106.8" stroke-dashoffset="74" transform="rotate(-70 21 21)"></circle></svg>
+                    <div style="font-size:17px;font-weight:700;color:#0F1524;margin-top:16px">Analyzing the room&#8230;</div>
+                    <div style="font-size:13px;color:#6B7688;margin-top:6px;text-align:center;line-height:19px">Identifying appliances and estimating their power use</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF;border-radius:22px;box-shadow:0 6px 14px rgba(11,18,32,.08);padding:36px 36px 0;display:flex;flex-direction:column;overflow:hidden">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:#12B886">03</div>
+          <h3 style="margin:14px 0 0;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:30px;letter-spacing:-0.02em;color:#0B1220">Confirm devices</h3>
+          <p style="margin:14px 0 0;font-size:17px;line-height:1.55;color:#5A6B85">Every detection shows its confidence. Adjust quantities, add what it missed, then save it to your home.</p>
+          <div style="margin-top:32px;position:relative;height:344px">
+            <div style="position:absolute;left:50%;margin-left:-176px;top:0;width:352px;height:660px;background:#0A0A0B;border-radius:52px;padding:11px;box-shadow:0 20px 40px rgba(11,18,32,.22)">
+              <div style="width:330px;height:638px;border-radius:42px;overflow:hidden;background:linear-gradient(180deg,#FFFFFF,#F4F7FC);position:relative">
+                <div style="padding:20px 14px 0">
+                  <div style="font-size:19px;font-weight:700;color:#0F1524">Confirm devices</div>
+                  <div style="display:flex;align-items:center;gap:11px;margin-top:14px">
+                    <div style="width:56px;height:56px;border-radius:14px;overflow:hidden;flex:none;background:#F1F4F9"><image-slot id="lp-confirm-thumb" shape="rounded" radius="14" placeholder="Room"></image-slot></div>
+                    <div>
+                      <div style="font-size:16px;font-weight:700;color:#0F1524">Living room</div>
+                      <span style="display:inline-flex;font-size:11px;font-weight:800;color:#12B886;background:rgba(18,184,134,.13);border-radius:999px;padding:4px 9px;margin-top:5px">Detected by AI</span>
+                    </div>
+                  </div>
+                  <div style="background:#FFFFFF;border:1px solid #EDF1F7;border-radius:20px;padding:13px;margin-top:14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(11,18,32,.05)">
+                    <i data-lucide="air-vent" style="width:23px;height:23px;color:#0F1524;flex:none"></i>
+                    <div style="flex:1;min-width:0">
+                      <div style="display:flex;align-items:center;gap:7px"><span style="font-size:14px;font-weight:700;color:#0F1524">Central AC</span><span style="font-size:10px;font-weight:800;color:#FFB020">Aging</span></div>
+                      <div style="display:flex;align-items:center;gap:7px;margin-top:6px">
+                        <div style="flex:1;height:7px;border-radius:99px;background:#F1F4F9;overflow:hidden"><div style="width:94%;height:7px;border-radius:99px;background:#12B886"></div></div>
+                        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#6B7688">94%</span>
+                      </div>
+                    </div>
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#0F1524">1</span>
+                  </div>
+                  <div style="background:#FFFFFF;border:1px solid #EDF1F7;border-radius:20px;padding:13px;margin-top:9px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(11,18,32,.05)">
+                    <i data-lucide="tv" style="width:23px;height:23px;color:#0F1524;flex:none"></i>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:14px;font-weight:700;color:#0F1524">TV</div>
+                      <div style="display:flex;align-items:center;gap:7px;margin-top:6px">
+                        <div style="flex:1;height:7px;border-radius:99px;background:#F1F4F9;overflow:hidden"><div style="width:88%;height:7px;border-radius:99px;background:#12B886"></div></div>
+                        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#6B7688">88%</span>
+                      </div>
+                    </div>
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#0F1524">1</span>
+                  </div>
+                  <div style="background:#FFFFFF;border:1px solid #EDF1F7;border-radius:20px;padding:13px;margin-top:9px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(11,18,32,.05)">
+                    <i data-lucide="lightbulb" style="width:23px;height:23px;color:#0F1524;flex:none"></i>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:14px;font-weight:700;color:#0F1524">Ceiling light</div>
+                      <div style="display:flex;align-items:center;gap:7px;margin-top:6px">
+                        <div style="flex:1;height:7px;border-radius:99px;background:#F1F4F9;overflow:hidden"><div style="width:76%;height:7px;border-radius:99px;background:#12B886"></div></div>
+                        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#6B7688">76%</span>
+                      </div>
+                    </div>
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#0F1524">4</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
   </div>
 
-  <h2>Built for accuracy, honest about estimates</h2>
-  <p>Every figure in the app is editable. If the model guesses a wattage and you
-  know better, change it — the whole projection updates. And because a scan-based
-  estimate is only ever an estimate, ElectroVision lets you calibrate against a
-  real utility bill so the numbers reflect your home rather than an average one.</p>
+  <!-- ════════ SAVINGS + REBATES ════════ -->
+  <div id="savings" style="background:linear-gradient(135deg,#0CA678,#0B7A5E);padding:120px 48px">
+    <div style="max-width:1248px;margin:0 auto;display:flex;gap:80px;align-items:flex-start">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#D6F3E8">Savings &amp; rebates</div>
+        <h2 style="margin:22px 0 0;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:56px;line-height:1.06;letter-spacing:-0.025em;color:#FFFFFF;max-width:520px;text-wrap:balance">Every fix, priced. Every rebate, found.</h2>
+        <p style="margin:24px 0 0;font-size:20px;line-height:1.55;color:#EAFBF4;max-width:500px;text-wrap:pretty">Recommendations are ranked by annual saving, with an estimated cost and a payback in years. No-cost changes come first — they save from day one.</p>
+        <div style="margin-top:44px;display:flex;gap:56px">
+          <div>
+            <div style="font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:62px;line-height:1;letter-spacing:-0.03em;color:#FFFFFF">$412</div>
+            <div style="font-size:16px;color:#D6F3E8;margin-top:8px">per year identified on a typical home</div>
+          </div>
+          <div>
+            <div style="font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:62px;line-height:1;letter-spacing:-0.03em;color:#FFFFFF">$13,375</div>
+            <div style="font-size:16px;color:#D6F3E8;margin-top:8px">in rebate programs matched, across six</div>
+          </div>
+        </div>
+        <div style="margin-top:44px;font-size:15px;line-height:1.6;color:#D6F3E8;max-width:500px">Program amounts are curated from published utility and state sources, with a verification date on every entry. Terms, caps and deadlines change — the app links you straight to the program page.</div>
+      </div>
 
-  <div class="card notice">
-    <h3>Please read: these are estimates, not measurements</h3>
-    <p>ElectroVision uses artificial intelligence to identify appliances and read
-    meters and bills. <strong>AI can be confidently wrong.</strong> It may
-    misidentify an appliance, invent a specification, or misread a number — and
-    present it as fact.</p>
-    <p>Check anything the app tells you before you act on it. This is a tool for
-    gathering and organising information about your energy use — <strong>not a
-    professional energy audit</strong>. Don't make significant financial decisions
-    based on its output without verifying the figures independently and speaking
-    to a qualified professional.</p>
+      <div style="flex:none;width:520px;display:flex;flex-direction:column;gap:16px">
+        <div style="background:#FFFFFF;border-radius:22px;padding:28px;box-shadow:0 10px 24px rgba(4,40,30,.2)">
+          <div style="font-size:11px;font-weight:800;letter-spacing:.1em;color:#5A6B85">IDENTIFIED SO FAR</div>
+          <div style="font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:44px;color:#0CA678;letter-spacing:-0.02em;margin-top:6px;line-height:1.05">Up to $13,375</div>
+          <div style="font-size:16px;color:#5A6B85;margin-top:8px;line-height:1.45">across 6 programs — most people never find these on their own</div>
+        </div>
+        <div style="background:#FFFFFF;border-radius:22px;padding:28px;box-shadow:0 10px 24px rgba(4,40,30,.2);display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <i data-lucide="thermometer" style="width:26px;height:26px;color:#12B886;flex:none;margin-top:2px"></i>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:18px;font-weight:700;color:#0B1220">HEAR heat-pump rebate</div>
+              <div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">
+                <span style="font-size:11px;font-weight:800;color:#3BC9DB;background:rgba(59,201,219,.14);border-radius:999px;padding:4px 10px">State of Georgia</span>
+                <span style="font-size:11px;font-weight:800;color:#FFB020;background:rgba(255,176,32,.14);border-radius:999px;padding:4px 10px">Income check needed</span>
+              </div>
+            </div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;color:#0CA678">$8,000</span>
+          </div>
+          <div style="height:1px;background:#E4EAF2"></div>
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <i data-lucide="house" style="width:26px;height:26px;color:#12B886;flex:none;margin-top:2px"></i>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:18px;font-weight:700;color:#0B1220">Home Comfort Bundle</div>
+              <div style="font-size:14px;color:#5A6B85;margin-top:4px">Insulation + air sealing — up to 50% of project cost</div>
+            </div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;color:#0CA678">$1,250</span>
+          </div>
+          <div style="height:1px;background:#E4EAF2"></div>
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <i data-lucide="thermometer-sun" style="width:26px;height:26px;color:#12B886;flex:none;margin-top:2px"></i>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:18px;font-weight:700;color:#0B1220">Smart thermostat instant rebate</div>
+              <div style="display:flex;gap:7px;margin-top:7px">
+                <span style="font-size:11px;font-weight:800;color:#12B886;background:rgba(18,184,134,.13);border-radius:999px;padding:4px 10px">Easy first win</span>
+              </div>
+            </div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;color:#0CA678">$75</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <h2>Your photos stay on your device</h2>
-  <p>Images are analyzed and discarded. They aren't stored on our servers, and
-  bill scanning is explicitly built to read your kilowatt-hours while ignoring
-  your name, address, and account number.
-  <a href="/privacy/">Read the privacy policy.</a></p>
-
-  <h2>Contact</h2>
-  <p><a href="mailto:azolazul@outlook.com">azolazul@outlook.com</a></p>
-</main>
-
-<footer>
-  <div class="foot">
-    <a href="/">Home</a>
-    <a href="/privacy/">Privacy</a>
-    <a href="/terms/">Terms</a>
-    <span class="who">&copy; 2026 River Angel Technologies Inc.</span>
+  <!-- ════════ METER / CALIBRATION ════════ -->
+  <div style="background:#F4F7FB;padding:120px 48px">
+    <div style="max-width:1248px;margin:0 auto;display:flex;gap:80px;align-items:center">
+      <div style="flex:none;width:520px;background:#FFFFFF;border-radius:22px;box-shadow:0 6px 14px rgba(11,18,32,.08);padding:36px">
+        <div style="height:220px;border-radius:16px;overflow:hidden;background:#F1F4F9"><image-slot id="lp-meter-photo" shape="rounded" radius="16" placeholder="Drop a meter photo"></image-slot></div>
+        <div style="margin-top:28px;display:flex;flex-direction:column;gap:20px">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:17px;font-weight:700;color:#0B1220">Estimated</span><span style="font-family:'IBM Plex Mono',monospace;font-size:17px;color:#5A6B85">1,314 kWh</span></div>
+            <div style="height:12px;border-radius:99px;background:#E4EAF2;margin-top:8px;overflow:hidden"><div style="width:94%;height:12px;border-radius:99px;background:#3BC9DB"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:17px;font-weight:700;color:#0B1220">Read from your meter</span><span style="font-family:'IBM Plex Mono',monospace;font-size:17px;color:#5A6B85">1,398 kWh</span></div>
+            <div style="height:12px;border-radius:99px;background:#E4EAF2;margin-top:8px;overflow:hidden"><div style="width:100%;height:12px;border-radius:99px;background:#12B886"></div></div>
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#0CA678">6% under — estimate calibrated to your home</div>
+        </div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#0CA678">Meter reading</div>
+        <h2 style="margin:22px 0 0;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:56px;line-height:1.06;letter-spacing:-0.025em;color:#0B1220;max-width:520px;text-wrap:balance">An estimate you can check against reality.</h2>
+        <p style="margin:24px 0 0;font-size:20px;line-height:1.55;color:#5A6B85;max-width:520px;text-wrap:pretty">Photograph your meter or your utility bill and the app reads the kWh, then anchors its estimate to your actual usage. Bill scanning reads only the usage numbers — it ignores your name, address and account number.</p>
+        <div style="margin-top:36px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:flex-start;gap:12px"><i data-lucide="check" style="width:22px;height:22px;color:#12B886;flex:none;margin-top:2px"></i><span style="font-size:18px;line-height:1.5;color:#0B1220">Estimated vs actual, side by side</span></div>
+          <div style="display:flex;align-items:flex-start;gap:12px"><i data-lucide="check" style="width:22px;height:22px;color:#12B886;flex:none;margin-top:2px"></i><span style="font-size:18px;line-height:1.5;color:#0B1220">Your own $/kWh rate, editable any time</span></div>
+          <div style="display:flex;align-items:flex-start;gap:12px"><i data-lucide="check" style="width:22px;height:22px;color:#12B886;flex:none;margin-top:2px"></i><span style="font-size:18px;line-height:1.5;color:#0B1220">Multiple properties — a home, an office, a rental</span></div>
+        </div>
+      </div>
+    </div>
   </div>
-</footer>
 
+  <!-- ════════ B2B ════════ -->
+  <sc-if value="{{ showB2B }}" hint-placeholder-val="{{ true }}">
+  <div id="utilities" style="position:relative;background:#10151C;padding:120px 48px;overflow:hidden">
+    <div style="position:absolute;bottom:-360px;left:-260px;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(18,184,134,.14),transparent 62%)"></div>
+    <div style="position:relative;z-index:2;max-width:1248px;margin:0 auto">
+      <div style="display:flex;gap:80px;align-items:flex-end">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#12B886">For utilities &amp; property managers</div>
+          <h2 style="margin:22px 0 0;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:56px;line-height:1.06;letter-spacing:-0.025em;color:#FFFFFF;max-width:640px;text-wrap:balance">Consumer simplicity. Professional rigor.</h2>
+        </div>
+        <p style="flex:none;width:440px;margin:0;font-size:19px;line-height:1.6;color:#9DB0CE;text-wrap:pretty">A self-service front door for energy-efficiency programs: it finds homes with an outsized footprint, quantifies what weatherization is worth, and measures whether the program actually delivered.</p>
+      </div>
+
+      <div style="margin-top:64px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+        <div style="background:#10192B;border:1px solid #1E2B45;border-radius:22px;padding:36px;display:flex;flex-direction:column;gap:16px">
+          <i data-lucide="crosshair" style="width:26px;height:26px;color:#12B886"></i>
+          <div style="font-size:22px;font-weight:700;color:#FFFFFF">Target the right homes</div>
+          <div style="font-size:17px;line-height:1.55;color:#9DB0CE">A&#8211;F scores and EUI benchmarking surface the high-footprint properties in a portfolio, ranked by the dollars available.</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#12B886;margin-top:auto">+18% vs typical &#183; kBtu/ft&#178;&#183;yr</div>
+        </div>
+        <div style="background:#10192B;border:1px solid #1E2B45;border-radius:22px;padding:36px;display:flex;flex-direction:column;gap:16px">
+          <i data-lucide="activity" style="width:26px;height:26px;color:#12B886"></i>
+          <div style="font-size:22px;font-weight:700;color:#FFFFFF">Prove the savings</div>
+          <div style="font-size:17px;line-height:1.55;color:#9DB0CE">Weather-normalized M&amp;V regresses baseline usage on heating and cooling degree days, so a hot summer can't unfairly fail a program.</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#12B886;margin-top:auto">kWh = a&#183;days + b&#183;CDD + c&#183;HDD</div>
+        </div>
+        <div style="background:#10192B;border:1px solid #1E2B45;border-radius:22px;padding:36px;display:flex;flex-direction:column;gap:16px">
+          <i data-lucide="gauge" style="width:26px;height:26px;color:#12B886"></i>
+          <div style="font-size:22px;font-weight:700;color:#FFFFFF">Manage peak, not just energy</div>
+          <div style="font-size:17px;line-height:1.55;color:#9DB0CE">Load factor separates a demand problem from an energy problem and tells you which lever to pull first.</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#12B886;margin-top:auto">avg kW / peak kW</div>
+        </div>
+      </div>
+
+      <div style="margin-top:44px;display:flex;align-items:center;gap:20px">
+        <a href="#waitlist" style="background:#12B886;color:#04221A;font-size:17px;font-weight:800;padding:17px 28px;border-radius:16px" style-hover="background:#0CA678;color:#04221A">Talk to us about a pilot</a>
+        <span style="font-size:16px;color:#7F91AE">Built on public appliance-energy data, per utility data-privacy guidance.</span>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ════════ HONESTY ════════ -->
+  <div style="background:#F4F7FB;padding:120px 48px">
+    <div style="max-width:1248px;margin:0 auto">
+      <div style="max-width:700px">
+        <div style="font-size:13px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#0CA678">What this is, and isn't</div>
+        <h2 style="margin:22px 0 0;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:56px;line-height:1.06;letter-spacing:-0.025em;color:#0B1220;text-wrap:balance">Built for honesty, not just hype.</h2>
+      </div>
+      <div style="margin-top:56px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+        <div style="background:#FFFFFF;border-radius:22px;box-shadow:0 6px 14px rgba(11,18,32,.08);padding:36px;display:flex;flex-direction:column;gap:14px">
+          <i data-lucide="sliders-horizontal" style="width:24px;height:24px;color:#15724C"></i>
+          <div style="font-size:21px;font-weight:700;color:#0B1220">Every figure is editable</div>
+          <div style="font-size:17px;line-height:1.55;color:#5A6B85">Estimates use typical published appliance wattages and a $0.14/kWh rate. If a guess is wrong, correct it — the whole projection updates.</div>
+        </div>
+        <div style="background:#FFFFFF;border-radius:22px;box-shadow:0 6px 14px rgba(11,18,32,.08);padding:36px;display:flex;flex-direction:column;gap:14px">
+          <i data-lucide="triangle-alert" style="width:24px;height:24px;color:#15724C"></i>
+          <div style="font-size:21px;font-weight:700;color:#0B1220">AI can be confidently wrong</div>
+          <div style="font-size:17px;line-height:1.55;color:#5A6B85">It may misidentify an appliance or misread a number and still sound sure. This is a tool for organizing information about your energy use — not a professional energy audit.</div>
+        </div>
+        <div style="background:#FFFFFF;border-radius:22px;box-shadow:0 6px 14px rgba(11,18,32,.08);padding:36px;display:flex;flex-direction:column;gap:14px">
+          <i data-lucide="shield-check" style="width:24px;height:24px;color:#15724C"></i>
+          <div style="font-size:21px;font-weight:700;color:#0B1220">Photos aren't stored</div>
+          <div style="font-size:17px;line-height:1.55;color:#5A6B85">Appliance photos are analyzed and then discarded — never kept on our servers. Bill scanning reads only usage, ignoring your identity and account number.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ PRICING ════════ -->
+  <sc-if value="{{ showPricing }}" hint-placeholder-val="{{ true }}">
+  <div id="pricing" style="background:#FFFFFF;padding:120px 48px">
+    <div style="max-width:1248px;margin:0 auto">
+      <div style="max-width:640px">
+        <div style="font-size:13px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#0CA678">Pricing</div>
+        <h2 style="margin:22px 0 0;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:56px;line-height:1.06;letter-spacing:-0.025em;color:#0B1220">Free to start. Then whatever fits.</h2>
+        <p style="margin:22px 0 0;font-size:20px;line-height:1.55;color:#5A6B85">Your first estimate costs nothing. Subscriptions unlock unlimited scans, multiple properties, and meter calibration.</p>
+      </div>
+      <div style="margin-top:56px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:stretch">
+        <div style="background:#F4F7FB;border-radius:22px;padding:36px;display:flex;flex-direction:column;gap:18px">
+          <div style="font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#5A6B85">Weekly</div>
+          <div style="font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:48px;letter-spacing:-0.03em;color:#0B1220;line-height:1">$9.99<span style="font-family:'Source Sans 3',sans-serif;font-size:19px;font-weight:600;color:#5A6B85"> /wk</span></div>
+          <div style="font-size:17px;line-height:1.55;color:#5A6B85">For a one-off audit weekend — cancel as soon as you're done.</div>
+          <div style="margin-top:auto;border:1.5px solid #CDD7E5;border-radius:16px;padding:14px;text-align:center;font-size:16px;font-weight:700;color:#0B1220">Choose weekly</div>
+        </div>
+        <div style="background:#10151C;border-radius:22px;padding:36px;display:flex;flex-direction:column;gap:18px;position:relative">
+          <div style="position:absolute;top:-14px;left:36px;background:#12B886;color:#04221A;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border-radius:999px">Best value</div>
+          <div style="font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#12B886">Annual</div>
+          <div style="font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:48px;letter-spacing:-0.03em;color:#FFFFFF;line-height:1">$39.99<span style="font-family:'Source Sans 3',sans-serif;font-size:19px;font-weight:600;color:#9DB0CE"> /yr</span></div>
+          <div style="font-size:17px;line-height:1.55;color:#9DB0CE">A full year of seasonal tracking — summer cooling, winter heating, and the trend between them. 3-day free trial.</div>
+          <div style="margin-top:auto;background:#12B886;border-radius:16px;padding:15px;text-align:center;font-size:16px;font-weight:800;color:#04221A">Start free trial</div>
+        </div>
+        <div style="background:#F4F7FB;border-radius:22px;padding:36px;display:flex;flex-direction:column;gap:18px">
+          <div style="font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#5A6B85">Monthly</div>
+          <div style="font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:48px;letter-spacing:-0.03em;color:#0B1220;line-height:1">$24.99<span style="font-family:'Source Sans 3',sans-serif;font-size:19px;font-weight:600;color:#5A6B85"> /mo</span></div>
+          <div style="font-size:17px;line-height:1.55;color:#5A6B85">Month to month for a portfolio you're actively working through. 3-day free trial.</div>
+          <div style="margin-top:auto;border:1.5px solid #CDD7E5;border-radius:16px;padding:14px;text-align:center;font-size:16px;font-weight:700;color:#0B1220">Choose monthly</div>
+        </div>
+      </div>
+      <div style="margin-top:28px;font-size:15px;color:#8B939D">Prices in USD, billed through the App Store. Cancel any time in your Apple subscription settings.</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ════════ CTA + FOOTER ════════ -->
+  <div style="position:relative;background:#0A0A0B;padding:120px 48px 56px;overflow:hidden">
+    <div style="position:absolute;top:-300px;right:-200px;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(18,184,134,.16),transparent 62%)"></div>
+    <div style="position:relative;z-index:2;max-width:1248px;margin:0 auto">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:28px;text-align:center">
+        <svg width="64" height="64" viewBox="0 0 100 100">
+          <g fill="none" stroke="rgba(255,255,255,.32)" stroke-width="4" stroke-linecap="round">
+            <path d="M10 28 V18 A8 8 0 0 1 18 10 H28"></path><path d="M72 10 H82 A8 8 0 0 1 90 18 V28"></path>
+            <path d="M90 72 V82 A8 8 0 0 1 82 90 H72"></path><path d="M28 90 H18 A8 8 0 0 1 10 82 V72"></path>
+          </g>
+          <path d="M60 4 L24 55 H46 L38 96 L78 43 H55 Z" fill="#FFFFFF" transform="translate(50,50) scale(0.72) translate(-51,-50)"></path>
+        </svg>
+        <h2 style="margin:0;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:64px;line-height:1.05;letter-spacing:-0.03em;color:#FFFFFF;max-width:760px;text-wrap:balance">Seeing energy, saving costs, greener future.</h2>
+        <p style="margin:0;font-size:20px;line-height:1.55;color:#9DB0CE;max-width:520px">One email when we're live on the App Store. Nothing else.</p>
+        <div style="display:flex;gap:12px;width:100%;max-width:520px;margin-top:8px">
+          <div style="flex:1;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16);border-radius:16px;padding:16px 20px;display:flex;align-items:center">
+            <span style="font-size:17px;color:#7F91AE">you@email.com</span>
+          </div>
+          <div style="background:#12B886;color:#04221A;font-size:17px;font-weight:800;padding:17px 28px;border-radius:16px;white-space:nowrap;box-shadow:0 4px 10px rgba(18,184,134,.5)">Join the waitlist</div>
+        </div>
+      </div>
+
+      <div style="margin-top:96px;padding-top:32px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:12px">
+          <svg width="26" height="26" viewBox="0 0 100 100"><path d="M60 4 L24 55 H46 L38 96 L78 43 H55 Z" fill="#FFFFFF"></path></svg>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#7F91AE">electrovision.app</span>
+        </div>
+        <div style="display:flex;gap:32px">
+          <a href="#pricing" style="font-size:15px;color:#7F91AE" style-hover="color:#FFFFFF">Pricing</a>
+          <a href="#utilities" style="font-size:15px;color:#7F91AE" style-hover="color:#FFFFFF">For utilities</a>
+          <a href="#waitlist" style="font-size:15px;color:#7F91AE" style-hover="color:#FFFFFF">Privacy</a>
+          <a href="#waitlist" style="font-size:15px;color:#7F91AE" style-hover="color:#FFFFFF">Terms</a>
+          <a href="#waitlist" style="font-size:15px;color:#7F91AE" style-hover="color:#FFFFFF">Support</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="lp-legal">
+  <a href="/terms/">Terms of Service</a>
+  <a href="/privacy/">Privacy Policy</a>
+  <a href="mailto:azolazul@outlook.com">azolazul@outlook.com</a>
+  <span>&copy; 2026 River Angel Technologies Inc.</span>
+</div>
 </body>
 </html>

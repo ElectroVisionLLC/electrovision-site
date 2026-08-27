@@ -1,0 +1,83 @@
+/* ElectroVision — Color system
+ * Energy/utility brand: deep navy + charcoal darks, clean white surfaces,
+ * an institutional forest-green primary (B2B) with a brighter electric-green
+ * "energy" accent for savings/positive states, plus a teal data accent.
+ * Sourced from the app theme (theme.ts) + the professional pitch deck palette.
+ */
+:root {
+  /* ---- Base neutrals ---- */
+  --charcoal:        #10151C;  /* institutional ink (pitch deck) */
+  --navy:            #0B1220;  /* app background */
+  --navy-surface:    #10192B;  /* elevated dark surface */
+  --navy-elevated:   #13233F;  /* hero gradient top */
+  --navy-line:       #1E2B45;  /* divider on dark */
+
+  --paper:           #FFFFFF;
+  --paper-alt:       #F4F7FB;  /* tinted card / fill */
+  --paper-on-dark:   #EEF1F5;
+
+  --ink:             #0B1220;  /* near-black text on light */
+  --ink-soft:        #5A6B85;  /* secondary text on light */
+  --slate:           #5A646F;  /* pitch-deck secondary */
+  --slate-light:     #8B939D;  /* tertiary / captions */
+  --line:            #E4EAF2;  /* hairline on light */
+  --line-deck:       #E4E7EC;
+  --ink-on-dark:     #EAF1FB;  /* primary text on dark */
+  --ink-on-dark-soft:#9DB0CE;  /* secondary text on dark */
+
+  /* ---- Brand greens ---- */
+  --brand:           #15724C;  /* institutional forest green — primary B2B */
+  --brand-dark:      #0F5236;
+  --brand-bright:    #3FA77B;  /* lighter institutional accent */
+
+  --energy:          #12B886;  /* electric green — savings / action / positive */
+  --energy-dark:     #0CA678;
+  --energy-deep:     #0B7A5E;
+
+  --accent-teal:     #3BC9DB;  /* data / chart accent */
+
+  /* ---- Status ---- */
+  --amber:           #FFB020;  /* warning / peak demand */
+  --orange:          #FF922B;
+  --danger:          #FF6B6B;
+
+  /* ---- Efficiency grade scale (A best -> F worst) ---- */
+  --grade-a:         #12B886;
+  --grade-b:         #4CAF50;
+  --grade-c:         #FFB020;
+  --grade-d:         #FF922B;
+  --grade-f:         #FF6B6B;
+
+  /* ---- Semantic aliases ---- */
+  --text-primary:        var(--ink);
+  --text-secondary:      var(--ink-soft);
+  --text-tertiary:       var(--slate-light);
+  --text-on-dark:        var(--ink-on-dark);
+  --text-on-dark-soft:   var(--ink-on-dark-soft);
+  --text-brand:          var(--brand);
+
+  --surface-page:        var(--navy);
+  --surface-dark:        var(--navy-surface);
+  --surface-dark-alt:    var(--navy-elevated);
+  --surface-card:        var(--paper);
+  --surface-card-alt:    var(--paper-alt);
+
+  --border-subtle:       var(--line);
+  --border-strong:       #CDD7E5;
+  --border-dark:         var(--navy-line);
+
+  --action:              var(--energy);     /* primary CTA fill */
+  --action-hover:        var(--energy-dark);
+  --action-ink:          #04221A;           /* text on energy-green fill */
+
+  --positive:            var(--energy);
+  --warning:             var(--amber);
+  --negative:            var(--danger);
+
+  /* Tint helpers (status pills use color + 22 alpha in app; tokenized here) */
+  --energy-tint:         rgba(18, 184, 134, 0.13);
+  --brand-tint:          rgba(21, 114, 76, 0.12);
+  --amber-tint:          rgba(255, 176, 32, 0.14);
+  --teal-tint:           rgba(59, 201, 219, 0.14);
+  --danger-tint:         rgba(255, 107, 107, 0.13);
+}

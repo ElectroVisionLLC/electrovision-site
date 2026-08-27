@@ -1,0 +1,22 @@
+/* ElectroVision — Spacing & layout
+ * 8px base grid (theme.ts: spacing(n) = n * 8).
+ */
+:root {
+  --space-0:    0;
+  --space-0-5:  4px;   /* 0.5 */
+  --space-1:    8px;   /* 1   */
+  --space-1-25: 10px;  /* 1.25 — common in app */
+  --space-1-5:  12px;  /* 1.5 */
+  --space-2:    16px;  /* 2   — default card padding */
+  --space-2-5:  20px;  /* 2.5 */
+  --space-3:    24px;  /* 3   */
+  --space-4:    32px;  /* 4   */
+  --space-5:    40px;
+  --space-6:    48px;
+  --space-8:    64px;
+
+  /* Layout */
+  --container-max:  1200px;
+  --gutter:         24px;
+  --tap-target:     44px;   /* minimum touch target */
+}

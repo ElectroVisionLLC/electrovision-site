@@ -1,0 +1,37 @@
+/* ElectroVision — Radii, shadows, motion
+ * Radii & card shadow from theme.ts; motion tuned for a calm, professional feel.
+ */
+:root {
+  /* ---- Corner radii ---- */
+  --radius-xs:   6px;
+  --radius-sm:   10px;   /* inputs, small fills (theme sm) */
+  --radius-md:   16px;   /* buttons, tiles (theme md) */
+  --radius-lg:   22px;   /* cards, heroes (theme lg) */
+  --radius-pill: 999px;
+
+  /* ---- Elevation ---- */
+  /* App card shadow: 0 6 14 rgba(0,0,0,.08) */
+  --shadow-sm:   0 1px 3px rgba(11, 18, 32, 0.06);
+  --shadow-card: 0 6px 14px rgba(11, 18, 32, 0.08);
+  --shadow-md:   0 10px 24px rgba(11, 18, 32, 0.10);
+  --shadow-lg:   0 20px 48px rgba(11, 18, 32, 0.16);
+  /* Energy-green glow used on the camera FAB */
+  --shadow-glow: 0 4px 10px rgba(18, 184, 134, 0.5);
+
+  /* ---- Motion ---- */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);   /* @kind other */
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);   /* @kind other */
+  --ease-in:       cubic-bezier(0.4, 0, 1, 1);      /* @kind other */
+  --dur-fast:      120ms;   /* @kind other */
+  --dur-base:      200ms;   /* @kind other */
+  --dur-slow:      320ms;   /* @kind other */
+
+  /* ---- Interaction states (from app: opacity press, no scale) ---- */
+  --press-opacity: 0.85;     /* @kind other */ /* PrimaryButton pressed */
+  --press-ghost:   0.7;      /* @kind other */ /* GhostButton pressed */
+  --disabled-opacity: 0.5;   /* @kind other */
+
+  /* ---- Borders ---- */
+  --border-hairline: 1px;
+  --border-control:  1.5px;  /* ghost buttons, chips */
+}
