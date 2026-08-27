@@ -29,9 +29,9 @@
   i[data-lucide] { display: inline-flex; }
   i[data-lucide] svg { display: block; }
 
-  #waitlist-email::placeholder { color: #7F91AE; }
-  #waitlist-email:focus { outline: 2px solid #12B886; outline-offset: 1px; }
-  #waitlist-btn:disabled { opacity: .6; cursor: default; }
+  #waitlist-email::placeholder, #waitlist-email-cta::placeholder { color: #7F91AE; }
+  #waitlist-email:focus, #waitlist-email-cta:focus { outline: 2px solid #12B886; outline-offset: 1px; }
+  #waitlist-btn:disabled, #waitlist-btn-cta:disabled { opacity: .6; cursor: default; }
 
   /* The source artboard is a fixed 1440px canvas with no media queries —
      correct for a design surface, unusable for a public page where most
@@ -39,26 +39,85 @@
      max-width:1344px rails keep the desktop layout identical. */
   .lp { width: 100%; font-family: 'Source Sans 3', sans-serif; color: #0B1220; background: #F4F7FB; overflow-x: hidden; }
 
+  /* MOBILE.
+     The source artboard is a fixed 1440px canvas: dozens of boxes carry
+     literal pixel widths (520px, 464px, 451px...) and flex:none so they
+     refuse to shrink. Patching them one at a time does not scale — 29 were
+     still overflowing a 402px screen. These rules neutralise the whole class
+     of problem instead.
+
+     Absolutely-positioned elements are exempt: they are decorative (glow
+     blobs, phone bezels) and live inside overflow:hidden parents, so they are
+     already clipped and constraining them would flatten the design. */
   @media (max-width: 900px) {
-    /* Every multi-column row in the artboard is a flex row with a fixed-width
-       child. Allowing wrap plus a min-width floor turns each into a stack
-       instead of a horizontally-scrolling strip. */
-    .lp [style*="display:flex"] { flex-wrap: wrap; }
-    .lp [style*="min-width"] { min-width: 0 !important; }
+    .lp *:not([style*="position:absolute"]) {
+      max-width: 100% !important;
+    }
+    /* flex:none is what stops these boxes shrinking; let them. */
+    .lp [style*="flex:none"]:not([style*="position:absolute"]) {
+      flex: 1 1 auto !important;
+      width: auto !important;
+    }
+    /* Every multi-column row becomes a stack rather than a squeezed strip. */
+    .lp [style*="display:flex"] { flex-wrap: wrap !important; }
+
+    /* Artboard gutters are 48px; that is a third of a phone screen. */
     .lp [style*="padding:28px 48px"],
     .lp [style*="padding:96px 48px"],
-    .lp [style*="padding:80px 48px"] { padding-left: 22px !important; padding-right: 22px !important; }
-    .lp h1, .lp [style*="font-size:64px"] { font-size: 38px !important; line-height: 1.08 !important; }
-    .lp [style*="font-size:52px"] { font-size: 32px !important; }
-    .lp [style*="font-size:44px"] { font-size: 28px !important; }
+    .lp [style*="padding:80px 48px"],
+    .lp [style*="padding:72px 48px"],
+    .lp [style*="padding:64px 48px"] {
+      padding-left: 20px !important;
+      padding-right: 20px !important;
+    }
 
-    /* The device mockups are drawn at true iPhone size (393-430px). On a 375px
-       screen they were clipped by the shell's overflow guard, which hid a slice
-       of the very screenshots the page is selling. Scale the whole mockup
-       instead so it stays entirely visible. */
-    .lp [style*="width:430px"] { width: 100% !important; height: auto !important; }
-    .lp [style*="width:393px"] { transform: scale(.82); transform-origin: top left; }
-    .lp [style*="width:451px"], .lp [style*="width:479px"] { max-width: 100% !important; }
+    /* Display type set for a 1440px canvas is unreadable on a phone. */
+    .lp h1, .lp [style*="font-size:78px"] { font-size: 34px !important; line-height: 1.08 !important; }
+    .lp h2, .lp [style*="font-size:64px"] { font-size: 30px !important; line-height: 1.12 !important; }
+    .lp [style*="font-size:52px"] { font-size: 27px !important; }
+    .lp [style*="font-size:44px"] { font-size: 26px !important; }
+    .lp [style*="font-size:32px"] { font-size: 24px !important; }
+    .lp [style*="font-size:23px"] { font-size: 17px !important; }
+    .lp [style*="font-size:20px"] { font-size: 16px !important; }
+
+    /* HERO PHONE. Its container holds an absolutely-positioned phone, so it
+       has no intrinsic width — the generic flex rule above collapsed it to
+       81px while the 352px phone inside kept its size and hung 222px off the
+       screen. It needs an explicit width, and the phone scaled to fit it. */
+    .lp [style*="width:430px"][style*="height:880px"] {
+      flex: none !important;
+      width: 100% !important;
+      height: 540px !important;
+      overflow: hidden !important;
+    }
+    .lp [style*="width:430px"][style*="height:880px"] > [style*="rotate(-4deg)"] {
+      transform: rotate(-4deg) scale(.6) !important;
+      transform-origin: top left !important;
+    }
+
+    /* The three "how it works" frames scale as a unit. */
+    .lp [style*="height:344px"] { height: 300px !important; }
+
+    /* The nav's five links do not fit one line at this width. */
+    .lp nav { flex-wrap: wrap !important; gap: 14px 18px !important; }
+    .lp nav a { font-size: 15px !important; }
+
+    /* Images must never dictate layout width. */
+    .lp img { max-width: 100% !important; height: auto !important; }
+  }
+
+  /* Very narrow phones (SE-class, 320-380px). The device mockups are drawn at
+     true handset size — a 352px bezel does not fit a 320px screen, so the
+     screenshot inside gets clipped by its own bezel. Scale the whole frame
+     rather than let it crop. */
+  @media (max-width: 380px) {
+    .lp [style*="width:352px"] {
+      transform: scale(.84) !important;
+      transform-origin: top center !important;
+    }
+    .lp [style*="width:393px"] { transform: scale(.68) !important; }
+    .lp [style*="height:344px"] { height: 260px !important; }
+    .lp [style*="height:880px"] { height: 620px !important; }
   }
 
   /* Shared footer — the artboard has no legal links, and Apple requires the
@@ -584,12 +643,16 @@
         </svg>
         <h2 style="margin:0;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:64px;line-height:1.05;letter-spacing:-0.03em;color:#FFFFFF;max-width:760px;text-wrap:balance">Seeing energy, saving costs, greener future.</h2>
         <p style="margin:0;font-size:20px;line-height:1.55;color:#9DB0CE;max-width:520px">One email when we're live on the App Store. Nothing else.</p>
-        <div style="display:flex;gap:12px;width:100%;max-width:520px;margin-top:8px">
-          <div style="flex:1;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16);border-radius:16px;padding:16px 20px;display:flex;align-items:center">
-            <span style="font-size:17px;color:#7F91AE">you@email.com</span>
-          </div>
-          <div style="background:#12B886;color:#04221A;font-size:17px;font-weight:800;padding:17px 28px;border-radius:16px;white-space:nowrap;box-shadow:0 4px 10px rgba(18,184,134,.5)">Join the waitlist</div>
-        </div>
+        <form onsubmit="return submitWaitlist(event, 'cta')" style="display:flex;gap:12px;width:100%;max-width:520px;margin-top:8px;flex-wrap:wrap">
+          <input id="waitlist-email-cta" type="email" required placeholder="you@email.com" autocomplete="email"
+                 style="flex:1;min-width:220px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16);
+                        border-radius:16px;padding:16px 20px;font-size:17px;color:#FFFFFF;font-family:'Source Sans 3',sans-serif;">
+          <button type="submit" id="waitlist-btn-cta"
+                  style="background:#12B886;color:#04221A;font-size:17px;font-weight:800;padding:17px 28px;
+                         border:none;border-radius:16px;white-space:nowrap;box-shadow:0 4px 10px rgba(18,184,134,.5);
+                         cursor:pointer;font-family:'Source Sans 3',sans-serif;">Join the waitlist</button>
+        </form>
+        <div id="waitlist-msg-cta" style="margin-top:4px;font-size:15px;min-height:20px"></div>
       </div>
 
       <div style="margin-top:96px;padding-top:32px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between">
@@ -615,11 +678,12 @@
   // this key can only INSERT into waitlist (supabase/waitlist.sql), nothing
   // else. Duplicate emails are handled quietly: a second signup from the same
   // address should read as confirmation, not an error.
-  async function submitWaitlist(evt) {
+  async function submitWaitlist(evt, which) {
     evt.preventDefault();
-    const input = document.getElementById("waitlist-email");
-    const btn = document.getElementById("waitlist-btn");
-    const msg = document.getElementById("waitlist-msg");
+    const sfx = which ? "-" + which : "";
+    const input = document.getElementById("waitlist-email" + sfx);
+    const btn = document.getElementById("waitlist-btn" + sfx);
+    const msg = document.getElementById("waitlist-msg" + sfx);
     const email = input.value.trim();
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
