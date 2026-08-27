@@ -61,6 +61,14 @@
     /* Every multi-column row becomes a stack rather than a squeezed strip. */
     .lp [style*="display:flex"] { flex-wrap: wrap !important; }
 
+    /* GRID rows are a separate CSS mechanism from flex and this page has four
+       of them, all repeat(3,1fr) — none touched by the flex rule above, which
+       is exactly how three cards ended up squeezed into three ~120px slivers
+       instead of wrapping. Grid never wraps on its own; it divides whatever
+       width it has into the column count you gave it, however small that
+       makes each one. Forcing a single column is what a flex-wrap does here. */
+    .lp [style*="display:grid"] { grid-template-columns: 1fr !important; }
+
     /* Artboard gutters are 48px; that is a third of a phone screen. */
     .lp [style*="padding:28px 48px"],
     .lp [style*="padding:96px 48px"],
