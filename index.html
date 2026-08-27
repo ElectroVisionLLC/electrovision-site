@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="/tokens/spacing.css">
 <link rel="stylesheet" href="/tokens/effects.css">
 <script src="https://unpkg.com/lucide@0.474.0/dist/umd/lucide.min.js" defer></script>
+<script src="/waitlist-config.js"></script>
 <style>
   /* The Claude Design runtime applied this globally; stripping the runtime
      took it with it. Without it the artboard's geometry is wrong everywhere a
@@ -27,6 +28,10 @@
   a:hover { color: #12B886; }
   i[data-lucide] { display: inline-flex; }
   i[data-lucide] svg { display: block; }
+
+  #waitlist-email::placeholder { color: #7F91AE; }
+  #waitlist-email:focus { outline: 2px solid #12B886; outline-offset: 1px; }
+  #waitlist-btn:disabled { opacity: .6; cursor: default; }
 
   /* The source artboard is a fixed 1440px canvas with no media queries —
      correct for a design surface, unusable for a public page where most
@@ -98,12 +103,16 @@
         <h1 style="margin:26px 0 0;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:78px;line-height:1.02;letter-spacing:-0.03em;color:#FFFFFF;max-width:660px;text-wrap:balance">See what your home actually costs to run.</h1>
         <p style="margin:30px 0 0;font-size:23px;line-height:1.5;color:#9DB0CE;max-width:560px;text-wrap:pretty">Photograph a room. ElectroVision identifies every appliance, prices each one to the month, grades your home A&#8211;F, and hands you a ranked plan to cut the bill.</p>
 
-        <div id="waitlist" style="margin-top:44px;display:flex;gap:12px;max-width:540px">
-          <div style="flex:1;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16);border-radius:16px;padding:16px 20px;display:flex;align-items:center">
-            <span style="font-size:17px;color:#7F91AE">you@email.com</span>
-          </div>
-          <div style="background:#12B886;color:#04221A;font-size:17px;font-weight:800;padding:17px 28px;border-radius:16px;white-space:nowrap;box-shadow:0 4px 10px rgba(18,184,134,.5)">Join the waitlist</div>
-        </div>
+        <form id="waitlist" onsubmit="return submitWaitlist(event)" style="margin-top:44px;display:flex;gap:12px;max-width:540px;flex-wrap:wrap">
+          <input id="waitlist-email" type="email" required placeholder="you@email.com" autocomplete="email"
+                 style="flex:1;min-width:220px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16);
+                        border-radius:16px;padding:16px 20px;font-size:17px;color:#FFFFFF;font-family:'Source Sans 3',sans-serif;">
+          <button type="submit" id="waitlist-btn"
+                  style="background:#12B886;color:#04221A;font-size:17px;font-weight:800;padding:17px 28px;
+                         border:none;border-radius:16px;white-space:nowrap;box-shadow:0 4px 10px rgba(18,184,134,.5);
+                         cursor:pointer;font-family:'Source Sans 3',sans-serif;">Join the waitlist</button>
+        </form>
+        <div id="waitlist-msg" style="margin-top:12px;font-size:15px;min-height:20px"></div>
         <div style="margin-top:16px;font-size:15px;color:#7F91AE">Launching on iOS. No spam — one email when the App Store listing goes live.</div>
 
         <div style="margin-top:52px;display:flex;gap:44px">
@@ -600,6 +609,62 @@
   </div>
 
 </div>
+
+<script>
+  // Public anon key + row-level security, same pattern as the app itself —
+  // this key can only INSERT into waitlist (supabase/waitlist.sql), nothing
+  // else. Duplicate emails are handled quietly: a second signup from the same
+  // address should read as confirmation, not an error.
+  async function submitWaitlist(evt) {
+    evt.preventDefault();
+    const input = document.getElementById("waitlist-email");
+    const btn = document.getElementById("waitlist-btn");
+    const msg = document.getElementById("waitlist-msg");
+    const email = input.value.trim();
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      msg.style.color = "#FF8A8A";
+      msg.textContent = "That doesn't look like a valid email address.";
+      return false;
+    }
+
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = "Joining…";
+    msg.textContent = "";
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          "Prefer": "return=minimal",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      // 201 = inserted. 409 = the email's already on the list (unique
+      // constraint) — that is success from the visitor's point of view, not
+      // an error to show them.
+      if (res.ok || res.status === 409) {
+        msg.style.color = "#12B886";
+        msg.textContent = "You're on the list — we'll email you when the App Store listing goes live.";
+        input.value = "";
+      } else {
+        throw new Error(`status ${res.status}`);
+      }
+    } catch (e) {
+      msg.style.color = "#FF8A8A";
+      msg.textContent = "Something went wrong. Please try again in a moment.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+    return false;
+  }
+</script>
 
 <div class="lp-legal">
   <a href="/terms/">Terms of Service</a>
