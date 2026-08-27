@@ -12,9 +12,16 @@
 <link rel="stylesheet" href="/tokens/typography.css">
 <link rel="stylesheet" href="/tokens/spacing.css">
 <link rel="stylesheet" href="/tokens/effects.css">
-<link rel="stylesheet" href="/tokens/ds-base.css">
 <script src="https://unpkg.com/lucide@0.474.0/dist/umd/lucide.min.js" defer></script>
 <style>
+  /* The Claude Design runtime applied this globally; stripping the runtime
+     took it with it. Without it the artboard's geometry is wrong everywhere a
+     padded box has an explicit width — most visibly the phone bezels, which
+     are authored as width:352px + padding:11px around a 330px screen. In
+     content-box that frame renders 374px, so the screen sits off-centre inside
+     it and the whole phone shifts left of where margin-left centres it. */
+  *, *::before, *::after { box-sizing: border-box; }
+
   body { margin: 0; background: #F4F7FB; }
   a { color: #0CA678; text-decoration: none; }
   a:hover { color: #12B886; }
