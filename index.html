@@ -53,10 +53,15 @@
     .lp *:not([style*="position:absolute"]) {
       max-width: 100% !important;
     }
-    /* flex:none is what stops these boxes shrinking; let them. */
+    /* flex:none (= flex 0 0 auto) stops oversized boxes shrinking. Release
+       the SHRINK only — never the grow, and never the declared width.
+       `flex: 1 1 auto; width: auto` was the previous attempt and it was worse
+       than the problem: flex-grow:1 made every small fixed-size element
+       expand to fill, so a `flex:none; width:26px` icon inflated to 117px and
+       took that space directly from the sentence beside it. `0 1 auto` lets a
+       520px card shrink to the screen while a 26px icon stays 26px. */
     .lp [style*="flex:none"]:not([style*="position:absolute"]) {
-      flex: 1 1 auto !important;
-      width: auto !important;
+      flex: 0 1 auto !important;
     }
     /* Every multi-column row becomes a stack rather than a squeezed strip. */
     .lp [style*="display:flex"] { flex-wrap: wrap !important; }
@@ -69,15 +74,31 @@
        makes each one. Forcing a single column is what a flex-wrap does here. */
     .lp [style*="display:grid"] { grid-template-columns: 1fr !important; }
 
-    /* Artboard gutters are 48px; that is a third of a phone screen. */
-    .lp [style*="padding:28px 48px"],
-    .lp [style*="padding:96px 48px"],
-    .lp [style*="padding:80px 48px"],
-    .lp [style*="padding:72px 48px"],
-    .lp [style*="padding:64px 48px"] {
+    /* GUTTERS. Every section uses a `<vertical>px 48px` shorthand, and 48px
+       each side takes a quarter of a 402px screen before any content exists.
+       Matched by PATTERN, not by listing values: the previous attempt
+       enumerated five specific paddings and missed `120px 48px`, which is the
+       single most common one on the page (7 uses) — that omission is why text
+       was still being squeezed to 79px. */
+    .lp [style*="px 48px"] {
       padding-left: 20px !important;
       padding-right: 20px !important;
     }
+
+    /* Card interiors compound the problem: after a 20px gutter, a 36px or
+       28px card padding on both sides removes another 56-72px, and whatever
+       is left has to hold an icon, a gap and a sentence. */
+    .lp [style*="padding:36px"] { padding: 20px !important; }
+    .lp [style*="padding:28px"] { padding: 18px !important; }
+
+    /* Gaps sized for a 1440px canvas. gap:80px between two columns is a fifth
+       of a phone screen spent on empty space, and gap:44px across a
+       three-stat row leaves each stat about 90px. */
+    .lp [style*="gap:80px"] { gap: 28px !important; }
+    .lp [style*="gap:56px"] { gap: 22px !important; }
+    .lp [style*="gap:44px"] { gap: 18px !important; }
+    .lp [style*="gap:40px"] { gap: 18px !important; }
+    .lp [style*="gap:36px"] { gap: 16px !important; }
 
     /* Display type set for a 1440px canvas is unreadable on a phone. */
     .lp h1, .lp [style*="font-size:78px"] { font-size: 34px !important; line-height: 1.08 !important; }
